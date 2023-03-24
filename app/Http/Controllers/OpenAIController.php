@@ -13,7 +13,7 @@ class OpenAIController extends Controller
 {
     const MAX_SECTION_LEN = 1500;
     const MAX_TOKENS = 150;
-    const MAX_QUERY_LENGTH = 300;
+    const MAX_QUERY_LENGTH = 500;
     const CHAT_HISTORY_LIMIT = 3;
     const CHAT_EMBEDDING_MODEL = 'text-embedding-ada-002';
     const CHAT_COMPLETION_MODEL = 'gpt-3.5-turbo';

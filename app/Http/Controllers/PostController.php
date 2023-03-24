@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,8 +14,6 @@ use Inertia\Response;
 
 class PostController extends Controller
 {
-    private string $title = 'Tymur Mardas\' Blog';
-
     public function __construct()
     {
         $this->middleware('auth')->only(['create', 'store', 'edit', 'update', 'destroy']);
@@ -34,8 +31,8 @@ class PostController extends Controller
         return renderViewDynamic('blog.index', [
             'posts' => $posts,
             'pagination' => $posts->links()->render(),
-            'title' => $this->title,
-            'success' => Session::get('success')
+            'success' => Session::get('success'),
+            ...getViewData('blog')
         ]);
     }
 
@@ -47,8 +44,8 @@ class PostController extends Controller
     public function create(): View|Response
     {
         return renderViewDynamic('blog.create', [
-            'title' => $this->title,
-            'action' => 'blog.store'
+            'action' => 'blog.store',
+            ...getViewData('blog'),
         ]);
     }
 
@@ -79,7 +76,7 @@ class PostController extends Controller
         $post = Post::find($id);
         return renderViewDynamic('blog.show', [
             'post' => $post,
-            'title' => $post->title
+            ...getViewData('blog'),
         ]);
     }
 
@@ -95,8 +92,8 @@ class PostController extends Controller
 
         return renderViewDynamic('blog.create', [
             'post' => $post,
-            'title' => $this->title,
-            'action' => 'blog.update'
+            'action' => 'blog.update',
+            ...getViewData('blog'),
         ]);
     }
 
@@ -119,8 +116,8 @@ class PostController extends Controller
 
         return renderViewDynamic('blog.show', [
             'post' => $post,
-            'title' => $this->title,
-            'action' => 'blog.update'
+            'action' => 'blog.update',
+            ...getViewData('blog'),
         ]);
     }
 

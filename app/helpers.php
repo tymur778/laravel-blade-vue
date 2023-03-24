@@ -22,7 +22,7 @@ function setRenderType(): void
 
 function renderViewDynamic($viewName, $data = []): \Illuminate\Contracts\View\View|\Inertia\Response
 {
-    $viewData = [...$data, ...getContent($viewName)];
+    $viewData = [...$data, ...getViewData($viewName)];
 
     $sessionRenderType = getRenderType();
     if ($sessionRenderType === RenderType::BLADE->value) {
@@ -46,18 +46,31 @@ function getMenus(): array
     return $menus;
 }
 
-function getContent(string $view): array
+function getViewData(string $view): array
 {
     $pagesContent = [
         'pages.home' => [
             'title' => 'Tymur Mardas, Main page',
-            'content' => fn() => File::get(resource_path('data/home_content.html'))],
+            'content' => fn() => File::get(resource_path('data/home_content.html')),
+            'viewBlade' => env('GITHUB_ACCOUNT_PATH') . 'resources/views/pages/home.blade.php',
+            'viewInertia' => env('GITHUB_ACCOUNT_PATH') . 'resources/js/Elements/Pages/Home.vue'],
         'pages.chat' => [
             'title' => 'Chat with Tymur Mardas',
-            'content' => null],
+            'content' => null,
+            'controller' => env('GITHUB_ACCOUNT_PATH') . 'app/Http/Controllers/OpenAIController.php',
+            'viewBlade' => env('GITHUB_ACCOUNT_PATH') . 'resources/views/pages/chat.blade.php',
+            'viewInertia' => env('GITHUB_ACCOUNT_PATH') . 'resources/js/Elements/Pages/Chat.vue'],
         'pages.profile' => [
             'title' => 'Tymur Mardas\' Profile',
-            'content' => fn() => File::get(resource_path('data/profile_content.html'))],
+            'content' => fn() => File::get(resource_path('data/profile_content.html')),
+            'viewBlade' => env('GITHUB_ACCOUNT_PATH') . 'resources/views/pages/profile.blade.php',
+            'viewInertia' => env('GITHUB_ACCOUNT_PATH') . 'resources/js/Elements/Pages/Profile.vue'],
+        'blog' => [
+            'title' => 'Tymur Mardas\' Blog',
+            'model' => env('GITHUB_ACCOUNT_PATH') . 'app/Models/Post.php',
+            'controller' => env('GITHUB_ACCOUNT_PATH') . 'app/Http/Controllers/PostController.php',
+            'viewBlade' => env('GITHUB_ACCOUNT_PATH') . 'resources/views/blog',
+            'viewInertia' => env('GITHUB_ACCOUNT_PATH') . 'resources/js/Elements/Blog'],
     ];
 
     return $pagesContent[$view] ?? [];

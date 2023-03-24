@@ -26,7 +26,6 @@ class sharedDataProvider extends ServiceProvider
      */
     public function boot()
     {
-
         $sharedData = [
             'menu' => getMenus(),
             'phpVersion' => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
@@ -35,7 +34,9 @@ class sharedDataProvider extends ServiceProvider
             'bladeType' => \RenderType::BLADE->value,
             'inertiaType' => \RenderType::INERTIA->value,
             'currentYear' => \Carbon\Carbon::now()->year,
+            'githubAccount' => env('GITHUB_ACCOUNT'),
         ];
+
         foreach ($sharedData as $key => $data) {
             switch (getRenderType()) {
                 case \RenderType::BLADE->value:

@@ -11,9 +11,11 @@
     </div>
     <div class="">
         <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ $currentYear }}</span>
-        [<a href="123" class="text-gray-500 pr-1 last:pr-0">Model.</a><!--
-      --><a href="123" class="text-gray-500 pr-1 last:pr-0">Controller.</a><!--
-      --><a href="{{ url('/swap-component') }}" class="text-gray-500 pr-1 last:pr-0">View</a>]
+        <span>
+            [@if (isset($model))<a href="{{ $model }}" target="_blank" class="text-gray-500 pr-1 last:pr-0">Model.</a>@endif<!--
+          -->@if (isset($controller))<a href="{{ $controller }}" target="_blank" class="text-gray-500 pr-1 last:pr-0">Controller.</a>@endif<!--
+          -->@if (isset($viewBlade))<a href="{{ $viewBlade }}" target="_blank" class="text-gray-500 pr-1 last:pr-0">View</a>@endif]
+        </span>
         <span class="text-sm block sm:inline-block text-gray-500 sm:text-center dark:text-gray-400">
             PHP:{{ $phpVersion }} Laravel:{{ $laravelVersion }}
         </span>
