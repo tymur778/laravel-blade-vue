@@ -11,19 +11,19 @@ use Orhanerday\OpenAi\OpenAi;
 
 class OpenAIController extends Controller
 {
-    const MAX_SECTION_LEN = 1500;
-    const MAX_TOKENS = 150;
-    const MAX_QUERY_LENGTH = 500;
-    const CHAT_HISTORY_LIMIT = 3;
-    const CHAT_EMBEDDING_MODEL = 'text-embedding-ada-002';
-    const CHAT_COMPLETION_MODEL = 'gpt-3.5-turbo';
-    const EMBEDDING_CSV_FILE = '/csv/tim_embed.csv';
-    const DATASET_CSV_FILE = '/csv/tim.csv';
+    private int $maxSectionLen, $maxTokens, $maxQueryLength, $chatHistoryLimit;
+    private string $chatEmbeddingModel, $chatCompletionModel, $embeddingCsvFile, $datasetCsvFile, $query;
 
-    private string $query;
-
-    public function __construct(private OpenAi $openAi)
+    public function __construct(private readonly OpenAi $openAi)
     {
+        $this->maxSectionLen = (int)env('CHAT_MAX_SECTION_LEN');
+        $this->maxTokens = (int)env('CHAT_MAX_TOKENS');
+        $this->maxQueryLength = (int)env('CHAT_MAX_QUERY_LENGTH');
+        $this->chatHistoryLimit = (int)env('CHAT_HISTORY_LIMIT');
+        $this->chatEmbeddingModel = env('CHAT_EMBEDDING_MODEL');
+        $this->chatCompletionModel = env('CHAT_COMPLETION_MODEL');
+        $this->embeddingCsvFile = env('CHAT_EMBEDDING_CSV_FILE');
+        $this->datasetCsvFile = env('CHAT_DATASET_CSV_FILE');
     }
 
     public function chatAnswer(Request $request): void
@@ -37,15 +37,15 @@ class OpenAIController extends Controller
 
         try {
             $embedding = $this->getQueryEmbedding();
-            $docsEmbed = $this->getEmbeddingsCsv();
-            $docsDataset = $this->getDatasetCsv();
+            $datasetEmbeddings = $this->getEmbeddingsCsv();
+            $dataset = $this->getDatasetCsv();
 
-            $similarities = $this->orderDocumentSectionsByQuerySimilarity($embedding, $docsEmbed);
-            $systemPrompt = $this->constructSystemPrompt($docsDataset, $similarities);
+            $similarities = $this->orderDocumentSectionsByQuerySimilarity($embedding, $datasetEmbeddings);
+            $systemPrompt = $this->constructSystemPrompt($dataset, $similarities);
             $messages = $this->constructMessages($systemPrompt);
 
             $this->outputStream($messages);
-//            $this->outputMessage($messages);
+//            $result = $this->outputMessage($messages);
         } catch (Exception $e) {
             echo sprintf('Error: %s', json_encode(
                 ['error' => $e->getMessage()]
@@ -82,11 +82,11 @@ class OpenAIController extends Controller
         - Yes, Tymur likes cats.
         Skip prose like 'As an AI assistant...'.
 
-         Answer as precise as possible using context provided further.";
+        Answer as precise as possible using context provided further.";
 
         $context = '
         Context:
-    ';
+        ';
 
         $chosen_sections_context = [];
         $chosen_sections_system = [];
@@ -98,8 +98,9 @@ class OpenAIController extends Controller
             $system_text = $docs[$i][3];
             $chosen_sections_len += strlen($context_text);
 
-            if ($chosen_sections_len > OpenAIController::MAX_SECTION_LEN)
+            if ($chosen_sections_len > $this->maxSectionLen) {
                 break;
+            }
 
             $chosen_sections_context[] = "\n* " . $context_text;
             $chosen_sections_system[] = " " . $system_text;
@@ -111,29 +112,41 @@ class OpenAIController extends Controller
         return $prompt;
     }
 
-    private function getEmbeddingsCsv(): array
+    private function getDatasetCsvPath(): string
     {
-        if (!file_exists(resource_path() . OpenAIController::EMBEDDING_CSV_FILE)) {
-            throw new \Exception('Embeddings file is missing');
-        }
-        $docs_embed = array_map(fn($line) => $csv[] = json_decode(str_getcsv($line)[2]), file(resource_path() . OpenAIController::EMBEDDING_CSV_FILE));
-        array_shift($docs_embed);
+        return base_path() . $this->datasetCsvFile;
+    }
 
-        return $docs_embed;
+    private function getEmbeddingsCsvPath(): string
+    {
+        return base_path() . $this->embeddingCsvFile;
     }
 
     private function getDatasetCsv(): array
     {
-        if (!file_exists(resource_path() . OpenAIController::DATASET_CSV_FILE)) {
+        if (!file_exists($this->getDatasetCsvPath())) {
             throw new Exception('Dataset file is missing');
         }
         $dataset_csv = [];
-        $dataset_file = fopen(resource_path() . OpenAIController::DATASET_CSV_FILE, 'r');
+        $dataset_file = fopen($this->getDatasetCsvPath(), 'r');
         fgetcsv($dataset_file);
         while (($result = fgetcsv($dataset_file)) !== false)
             $dataset_csv[] = $result;
 
         return $dataset_csv;
+    }
+
+    private function getEmbeddingsCsv(): array
+    {
+        if (!file_exists($this->getEmbeddingsCsvPath())) {
+            throw new \Exception('Embeddings file is missing');
+        }
+        $docs_embed = array_map(
+            fn($line) => $csv[] = json_decode(str_getcsv($line)[2]),
+            file($this->getEmbeddingsCsvPath()));
+        array_shift($docs_embed);
+
+        return $docs_embed;
     }
 
     private function constructMessages($systemPrompt): array
@@ -148,7 +161,7 @@ class OpenAIController extends Controller
         $chatHistory = Session::get('chat');
         if (is_array($chatHistory)) {
             foreach ($chatHistory as $message) {
-                if ($i >= OpenAIController::CHAT_HISTORY_LIMIT) {
+                if ($i >= $this->chatHistoryLimit) {
                     break;
                 }
 
@@ -172,11 +185,11 @@ class OpenAIController extends Controller
         return $messages;
     }
 
-    private function getQueryEmbedding()
+    private function getQueryEmbedding(): array
     {
         $embed = $this->openAi->embeddings([
             'input' => $this->query,
-            'model' => OpenAIController::CHAT_EMBEDDING_MODEL
+            'model' => $this->chatEmbeddingModel
         ]);
 
         $resEmbed = json_decode($embed);
@@ -198,10 +211,10 @@ class OpenAIController extends Controller
 
         $this->openAi->setTimeout(10);
         $this->openAi->chatCompletion([
-            'model' => OpenAIController::CHAT_COMPLETION_MODEL,
+            'model' => $this->chatCompletionModel,
             'messages' => $messages,
             'temperature' => 0,
-            'max_tokens' => OpenAIController::MAX_TOKENS,
+            'max_tokens' => $this->maxTokens,
             'stream' => true,
         ], function ($curl_info, $data) use (&$temp_response) {
             $temp_data = Str::replace('data: ', '', $data);
@@ -217,7 +230,7 @@ class OpenAIController extends Controller
         });
 
         $chatHistory = Session::get('chat');
-        if (count($chatHistory) >= OpenAIController::CHAT_HISTORY_LIMIT)
+        if (count($chatHistory) >= $this->chatHistoryLimit)
             array_shift($chatHistory);
 
         $chatHistory[] = [$this->query, $temp_response];
@@ -228,20 +241,20 @@ class OpenAIController extends Controller
     private function outputMessage($messages)
     {
         $complete = $this->openAi->chatCompletion([
-            'model' => OpenAIController::CHAT_COMPLETION_MODEL,
+            'model' => $this->chatCompletionModel,
             'messages' => $messages,
             'temperature' => 0,
-            'max_tokens' => OpenAIController::MAX_TOKENS,
+            'max_tokens' => $this->maxTokens,
         ]);
 
         $res = json_decode($complete);
-        return $res->choices[0]->text;
+        return $res->choices[0]->message->content;
     }
 
-    private function setQuery($query): void
+    public function setQuery($query): void
     {
         $query = new HtmlString($query);
-        $query = Str::limit($query, OpenAIController::MAX_QUERY_LENGTH);
+        $query = Str::limit($query, $this->maxQueryLength);
 
         $this->query = $query;
     }

@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(OpenAi::class, function () {
-            return new OpenAi(env('OPEN_AI_KEY'));
+            return new OpenAi(env('CHAT_OPEN_AI_KEY'));
         });
     }
 

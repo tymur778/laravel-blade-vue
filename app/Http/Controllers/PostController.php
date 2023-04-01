@@ -21,8 +21,6 @@ class PostController extends Controller
 
     /**
      * Return all resources.
-     *
-     * @return View|Response
      */
     public function index(): View|Response
     {
@@ -38,8 +36,6 @@ class PostController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return View|Response
      */
     public function create(): View|Response
     {
@@ -51,9 +47,6 @@ class PostController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return Redirector|Application|RedirectResponse
      */
     public function store(Request $request): Redirector|Application|RedirectResponse
     {
@@ -67,9 +60,6 @@ class PostController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param int $id
-     * @return View
      */
     public function show(int $id): View|Response
     {
@@ -82,9 +72,6 @@ class PostController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return View
      */
     public function edit(int $id): View|Response
     {
@@ -99,10 +86,6 @@ class PostController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return View|Response
      */
     public function update(Request $request, int $id): View|Response
     {
@@ -123,9 +106,6 @@ class PostController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return RedirectResponse
      */
     public function destroy(int $id): RedirectResponse
     {
