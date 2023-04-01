@@ -22,3 +22,4 @@
         @endauth
     </div>
 @endsection
+@vite(['resources/js/Plugins/prism/prism.js', "resources/js/Plugins/prism/prism.css"])

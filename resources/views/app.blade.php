@@ -14,6 +14,7 @@
         <!-- Scripts -->
         @routes
         @vite(['resources/js/app.js', "resources/js/Elements/{$page['component']}.vue"])
+        @vite(['resources/js/Plugins/prism/prism.js', "resources/js/Plugins/prism/prism.css"])
         @inertiaHead
         @csrf
     </head>

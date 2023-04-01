@@ -1,12 +1,14 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import {useForm, usePage} from "@inertiajs/inertia-vue3";
+import Prism from '@/Plugins/prism/prism.js';
 
 const post = usePage().props.value.post;
 const form = useForm({});
 </script>
 
 <template>
+
     <Head :title="$page.props.title" />
 
     <AppLayout>
@@ -36,9 +38,12 @@ export default {
     props: {
         post: Object,
     },
+    mounted() {
+        Prism.highlightAll();
+    }
 }
 </script>
 
 <style scoped>
-
+    @import url('@/Plugins/prism/prism.css');
 </style>

@@ -8,7 +8,9 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/js/vue-app.js',
-                'resources/css/app.scss'
+                'resources/css/app.scss',
+                'resources/js/Plugins/prism/prism.js',
+                'resources/js/Plugins/prism/prism.css',
             ],
             refresh: true,
         }),
