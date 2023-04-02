@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import {useForm, usePage} from "@inertiajs/inertia-vue3";
-import Prism from '@/Plugins/prism/prism.js';
+import Prism from '@/plugins/prism.js';
 
 const post = usePage().props.value.post;
 const form = useForm({});
@@ -16,7 +16,7 @@ const form = useForm({});
             <div class="col-12 pt-2">
                 <h1 v-if="$page.props.post" class="text-4xl uppercase mb-2">{{ post.title }}</h1>
                 <p v-if="$page.props.post" class="text-black italic mb-6">{{ post.created_at }}</p>
-                <p v-if="$page.props.post" class="text-black text-base font-thin mb-2" v-html="$page.props.post.content" />
+                <div v-if="$page.props.post" class="text-black text-base font-thin mb-2" v-html="$page.props.post.content" />
                 <p v-else class="text-warning">No such blog Post available</p>
 
                 <span v-if="$page.props.auth.user">
@@ -45,5 +45,5 @@ export default {
 </script>
 
 <style scoped>
-    @import url('@/Plugins/prism/prism.css');
+    @import url('/resources/css/plugins/prism.css');
 </style>

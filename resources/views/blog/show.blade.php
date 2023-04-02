@@ -4,7 +4,7 @@
         @if ($post ==! null)
             <h1 class="text-4xl uppercase mb-2">{{ $post->title }}</h1>
             <p class="text-black italic mb-6">{{ $post->created_at }}</p>
-            <p class="text-black text-base font-thin mb-2">{!! $post->content !!}</p>
+            <div class="text-black text-base font-thin mb-2">{!! $post->content !!}</div>
         @else
             <p class="text-warning">No such blog Post available</p>
         @endif
@@ -22,4 +22,4 @@
         @endauth
     </div>
 @endsection
-@vite(['resources/js/Plugins/prism/prism.js', "resources/js/Plugins/prism/prism.css"])
+@vite(['resources/js/plugins/prism.js', "resources/css/plugins/prism.css"])
